@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet"   href="../static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>Busqueda</title>
+</head>
+<body>
+    <div id="Titulo">
+        <h1>Búsqueda de palabras en Libros</h1>
+        <img src="../static/libro.png" alt="libro">
+    </div>
+    
+    <div class="wrap">
+        <div class="search">
+            <!-- Formulario de búsqueda -->
+            <input type="text" id="keyword" class="searchTerm" placeholder="Qué palabra buscas?">
+            <button type="button" class="searchButton" onclick="search()">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        function search() {
+            var keyword = document.getElementById('keyword').value;
+
+            // Ruta del directorio donde se encuentran los archivos TXT
+            var directory = 'libros';
+
+            // Vaciar resultados anteriores
+            document.getElementById('results').innerHTML = '';
+
+            // Realizar búsqueda de la palabra
+            fetch('/search?keyword=' + keyword)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(result => {
+                        var resultElement = document.createElement('div');
+                        resultElement.innerHTML = '<h3>' + result.filename + '</h3><p id="num">Número de veces encontrada: ' + result.occurrences + '</p><p>' + result.keywords + '</p>';
+                        document.getElementById('results').appendChild(resultElement);
+                    });
+                })
+                .catch(error => console.error('Error al buscar la palabra:', error));
+        }
+    </script>
+</body>
+</html>
