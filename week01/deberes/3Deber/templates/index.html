@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet"   href="../static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>Busqueda</title>
+</head>
+<body>
+    <div id="Titulo">
+        <h1>Búsqueda de palabras en Libros</h1>
+        <img src="../static/libro.png" alt="libro">
+    </div>
+    
+    <div class="wrap">
+        <div class="search">
+            <!-- Formulario de búsqueda -->
+            <input type="text" id="keyword" class="searchTerm" placeholder="Qué palabra buscas?">
+            <button type="button" class="searchButton" onclick="search()">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="botones">
+        <button id="andBtn" onclick="updateKeyword('AND')">AND</button>
+        <button id="orBtn" onclick="updateKeyword('OR')">OR</button>
+        <button id="notBtn" onclick="updateKeyword('NOT')">NOT</button>
+    </div>
+      
+    <h3>La palabra se encuentra en los siguientes libros:</h3>	
+    <div id="results"></div>
+
+    <!-- Formulario adicional para consultas booleanas -->
+    <div class="wrap">
+        <div class="search">
+            <input type="text" id="booleanQuery" class="searchTerm" placeholder="Qué palabras buscas?">
+            <button type="button" class="searchButton" onclick="booleanSearch()">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        //Funcion con solo una palabra
+        function search() {
+            var keyword = document.getElementById("keyword").value;
+            fetch("/search?keyword=" + keyword)
+                .then(response => response.json())
+                .then(data => {
+                    var resultsDiv = document.getElementById("results");
+                    resultsDiv.innerHTML = ""; // Limpiar resultados anteriores
+
+                    if (data.files) {
+                        var files = data.files;
+                        var resultList = document.createElement("ul");
+
+                        files.forEach(file => {
+                            var listItem = document.createElement("li");
+                            listItem.textContent = file;
+                            resultList.appendChild(listItem);
+                        });
+
+                        resultsDiv.appendChild(resultList);
+                    } else if (data.message) {
+                        resultsDiv.textContent = data.message;
+                    }
+                });
+        }
+        //Funcion para obtener la palabra del botón
+        function updateKeyword(word) {
+            var currentKeyword = document.getElementById("booleanQuery").value;
+            var updatedKeyword = currentKeyword + " " + word;
+            document.getElementById("booleanQuery").value = updatedKeyword.trim();
+        }
+
+        // Función para manejar la búsqueda booleana
+        function booleanSearch() {
+            var query = document.getElementById("booleanQuery").value;
+            fetch("/boolean_search?query=" + query)
+                .then(response => response.json())
+                .then(data => {
+                    var resultsDiv = document.getElementById("results");
+                    resultsDiv.innerHTML = ""; // Limpiar resultados anteriores
+
+                    if (data.resultados) {
+                        var resultList = document.createElement("ul");
+                        data.resultados.forEach(file => {
+                            var listItem = document.createElement("li");
+                            listItem.textContent = file;
+                            resultList.appendChild(listItem);
+                        });
+                        resultsDiv.appendChild(resultList);
+                    } else {
+                        resultsDiv.textContent = "No se encontraron documentos que cumplan con la consulta.";
+                    }
+                });
+        }
+    </script>
+    
+</body>
+</html>
